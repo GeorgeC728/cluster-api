@@ -1,12 +1,12 @@
 # Load libraries
 from flask import Flask             # Flask libraries required for API
+from healthcheck import *            # Import all calls from healthcall
 
+# Create api object
 api = Flask(__name__)
 
-# Healthcheck call
-@api.route("/healthcheck", methods = ["GET"])
-def health_check():
-    return({"alive": True})
+# Register healthcheck call
+api.register_blueprint(healthcheck_call)
 
 # Start app
 if __name__ == "__main__":
