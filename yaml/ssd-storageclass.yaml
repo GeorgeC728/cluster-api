@@ -1,3 +1,5 @@
+# This YAML will create an SSD storage class
+# There should be no need for a non-SSD drive but we will see.
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
