@@ -15,7 +15,7 @@ service = client.V1Service(
     api_version = "v1",
     kind = "Service",
     metadata = client.V1ObjectMeta(name = "minecraft", labels = {"app": "minecraft"}),
-    spec = client.V1ServiceSpec(selector = {"app": "minecraft"})
+    spec = client.V1ServiceSpec(selector = {"app": "minecraft"}, cluster_ip = "None")
 )
 
 #api_instance = client.CoreV1Api(api_client)
