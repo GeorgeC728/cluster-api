@@ -2,7 +2,7 @@ from kubernetes import client, config               # For interacting with k8s A
 from misc_functions import *                        # Functions that I'm not sure where else to put
 
 # Create a service for a given server name
-def create_service(client, server_name):
+def create_service(id):
     service = client.V1Service(
         # Set API version
         api_version = "v1",
@@ -10,18 +10,25 @@ def create_service(client, server_name):
         kind = "Service",
         # Create metadata
         metadata = client.V1ObjectMeta(
-            name = server_name,
-            labels = {"app": server_name}),
+            name = "minecraft-id-" + id,
+            labels = {"app": "minecraft-id-" + id}),
         # Create service spec
         spec = client.V1ServiceSpec(
-            selector = {"app": server_name},
-            cluster_ip = "None")
+            type = "NodePort",
+            selector = {"app": "minecraft-id-" + id},
+            ports = [
+                client.V1ServicePort(
+                    protocol = "TCP",
+                    port = 25565,
+                    target_port = "primary"
+                )
+            ])
     )
     # Return service object for deployment
     return service
 
 # Creates the volume claim object that will form part of the statefulset
-def param_volume_claim(id, disk_gb):
+def create_volume_claim(id, disk_gb):
     volume_claim = client.V1PersistentVolumeClaim(
         metadata = client.V1ObjectMeta(
             # Create unique name of pvc
@@ -41,7 +48,7 @@ def param_volume_claim(id, disk_gb):
     # Return the volume claim
     return(volume_claim)
 
-def param_pod_template_spec(id, game, ram_gb):
+def create_pod_template_spec(id, game, ram_gb):
     pod = client.V1PodTemplateSpec(
         metadata = client.V1ObjectMeta(
                 labels = {"app": "minecraft-id-" + id}
@@ -83,31 +90,52 @@ def param_pod_template_spec(id, game, ram_gb):
     # Return the pod spec
     return(pod)
 
-def param_statefulset_spec(id, game, ram_gb, disk_gb):
+def create_statefulset_spec(id, game, ram_gb, disk_gb):
 
     statefulset_spec = client.V1StatefulSetSpec(
         selector = client.V1LabelSelector(
             match_labels = {"app": "minecraft-id-" + id}),
         service_name = "minecraft-id-" + id,
         replicas = 1,
-        template = param_pod_template_spec(id, game, ram_gb),
-        volume_claim_templates = [param_volume_claim(id, disk_gb)]
+        template = create_pod_template_spec(id, game, ram_gb),
+        volume_claim_templates = [create_volume_claim(id, disk_gb)]
     )
 
     return(statefulset_spec)
 
-def param_statefulset(id, game, ram_gb, disk_gb):
+def create_statefulset(id, game, ram_gb, disk_gb):
 
     statefulset = client.V1StatefulSet(
         api_version = "apps/v1",
         kind = "StatefulSet",
         metadata = client.V1ObjectMeta(name = "minecraft-id-" + id),
-        spec = param_statefulset_spec(id, game, ram_gb, disk_gb)
+        spec = create_statefulset_spec(id, game, ram_gb, disk_gb)
     )
 
     return(statefulset)
 
-def create_statefulset(apps_v1_api, id, game, ram_gb, disk_gb):
-    statefulset = param_statefulset(id, game, ram_gb, disk_gb)
+def deploy_statefulset(apps_v1_api, id, game, ram_gb, disk_gb):
+    statefulset = create_statefulset(id, game, ram_gb, disk_gb)
 
     apps_v1_api.create_namespaced_stateful_set(namespace = "default", body = statefulset)
+
+def deploy_service(core_v1_api, id):
+    service = create_service(id)
+
+    core_v1_api.create_namespaced_service(namespace = "default", body = service)
+
+def scale_statefulset(apps_v1_api, id, replicas_count):
+    apps_v1_api.patch_namespaced_stateful_set_scale(
+        namespace = "default",
+        name = "minecraft-id-" + id,
+        body = {"spec":{"replicas":replicas_count}}
+        #body = client.V1StatefulSet(
+        #    spec = client.V1StatefulSetSpec(
+        #        #selector = client.V1LabelSelector(
+        #        #    match_labels = {"app": "minecraft-id-" + id}),
+        #        replicas = replicas_count))
+    )
+    #apps_v1_api.patch_namespaced_stateful_set_scale(
+    #    namespace = "default",
+    #    body = {"spec":{"replicas":replicas_count}}
+    #)

@@ -10,13 +10,20 @@ k8s_calls = Blueprint("k8s_calls", __name__)
 
 config.load_kube_config()
 
-api_client = client.CoreV1Api()
+core_v1_api = client.CoreV1Api()
 apps_v1_api = client.AppsV1Api()
 
-@k8s_calls.route("/v1/create-server/", methods = ["GET"])
-def create_server():
+@k8s_calls.route("/v1/server/<id>/create", methods = ["GET"])
+def create_server(id):
     # Function to create server
     #k8s.create_service(api_client, "minecraft")
-    k8s.create_statefulset(apps_v1_api, id = "2", game = "minecraft", ram_gb = 2, disk_gb = "5")
+    k8s.deploy_statefulset(apps_v1_api, id = str(id), game = "minecraft", ram_gb = 2, disk_gb = "5")
+    k8s.deploy_service(core_v1_api, str(id))
 
     return({"success": "much"})
+
+@k8s_calls.route("/v1/server/<id>/stop", methods = ["GET"])
+def stop_server(id):
+    k8s.scale_statefulset(apps_v1_api, str(id), 0)
+
+    return{"success": "much"}
