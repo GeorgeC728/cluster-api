@@ -47,7 +47,7 @@ def param_pod_template_spec(id, game, ram_gb):
                 labels = {"app": "minecraft-id-" + id}
             ),
         spec = client.V1PodSpec(
-            termination_grace_period_seconds = 180,
+            termination_grace_period_seconds = 10,
             containers = [
                 client.V1Container(
                     name = "minecraft-container-id-" + id,
@@ -62,6 +62,18 @@ def param_pod_template_spec(id, game, ram_gb):
                         client.V1EnvVar(
                             name = "MEMORY",
                             value = str(ram_gb * 1024)
+                        )
+                    ],
+                    ports = [
+                        client.V1ContainerPort(
+                            name = "primary",
+                            container_port = 25565,
+                            protocol = "TCP"
+                        ),
+                        client.V1ContainerPort(
+                            name = "rcon",
+                            container_port = 25566,
+                            protocol = "TCP"
                         )
                     ]
                 )
