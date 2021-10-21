@@ -54,7 +54,7 @@ def param_pod_template_spec(id, game, ram_gb):
                     image = get_image_name(game),
                     volume_mounts = [
                         client.V1VolumeMount(
-                            name = "minecraft-pvc-" + id,
+                            name = "minecraft-pvc-id-" + id,
                             mount_path = "/data/server"
                         )
                     ],
@@ -87,17 +87,15 @@ def param_statefulset_spec(id, game, ram_gb, disk_gb):
 def param_statefulset(id, game, ram_gb, disk_gb):
 
     statefulset = client.V1StatefulSet(
-        api_versionn = "apps/v1",
+        api_version = "apps/v1",
         kind = "StatefulSet",
         metadata = client.V1ObjectMeta(name = "minecraft-id-" + id),
-        spec = param_statefulset_spec(id, game, ram_gb)
+        spec = param_statefulset_spec(id, game, ram_gb, disk_gb)
     )
 
     return(statefulset)
 
-def create_statefulset(id, game, ram_gb, disk_gb):
-    config.load_kube_config()
-    apps_v1_api = client.AppsV1Api()
+def create_statefulset(apps_v1_api, id, game, ram_gb, disk_gb):
     statefulset = param_statefulset(id, game, ram_gb, disk_gb)
 
     apps_v1_api.create_namespaced_stateful_set(namespace = "default", body = statefulset)
