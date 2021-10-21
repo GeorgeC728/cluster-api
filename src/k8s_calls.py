@@ -27,3 +27,9 @@ def stop_server(id):
     k8s.scale_statefulset(apps_v1_api, str(id), 0)
 
     return{"success": "much"}
+
+@k8s_calls.route("/v1/server/<id>/start", methods = ["GET"])
+def start_server(id):
+    k8s.scale_statefulset(apps_v1_api, str(id), 1)
+
+    return{"success": "much"}
