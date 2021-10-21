@@ -8,4 +8,5 @@ def get_image_name(game):
     if game == "rust":
         return("eu.gcr.io/server-hosting-303517/games/rust:latest")
     
+    # Return None if not found - can use better error handling
     return(None)
