@@ -5,8 +5,10 @@ metadata:
   labels:
     app: minecraft-id-2        # Will change
 spec:
-  type: LoadBalancer
-  loadBalancerIP: 35.246.23.17
+  type: NodePort
+  #loadBalancerIP: 35.246.23.17
+  #externalIPs:
+  #  - "35.246.23.17"
   selector:
     app: minecraft-id-2
   ports:
