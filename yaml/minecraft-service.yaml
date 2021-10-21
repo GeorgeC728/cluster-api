@@ -5,9 +5,11 @@ metadata:
   labels:
     app: minecraft-id-2        # Will change
 spec:
-  type: NodePort
-  ports:
-  - port: 80
-    targetPort: 25565
+  type: LoadBalancer
+  loadBalancerIP: 35.246.23.17
   selector:
-    app: minecraft-id-2        # Will change
+    app: minecraft-id-2
+  ports:
+  - protocol: "TCP"
+    port: 25565
+    targetPort: primary
