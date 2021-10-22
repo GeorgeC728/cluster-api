@@ -12,10 +12,10 @@ spec:
       labels:
         app: sftp-6
     spec:
-      #volumes:
-      #- name: server-volume
-      #  persistentVolumeClaim:
-      #    claimName: minecraft-pvc-id-6-minecraft-id-6-0
+      volumes:
+      - name: server-volume
+        persistentVolumeClaim:
+          claimName: minecraft-pvc-id-6-minecraft-id-6-0
       containers:
       - name: sftp-6
         image: atmoz/sftp:latest
@@ -23,6 +23,6 @@ spec:
         ports:
         - name: sftp-primary
           containerPort: 22
-        #volumeMounts:
-        #- mountPath: "/home/foo/upload"
-        #  name: server-volume
+        volumeMounts:
+        - mountPath: "/home/foo/upload/disk"
+          name: server-volume
