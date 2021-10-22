@@ -2,7 +2,7 @@ from kubernetes import client, config               # For interacting with k8s A
 from misc_functions import *                        # Functions that I'm not sure where else to put
 
 # Create a service for a given server name
-def create_service(id):
+def create_service(id, port, target_port):
     service = client.V1Service(
         # Set API version
         api_version = "v1",
@@ -19,8 +19,8 @@ def create_service(id):
             ports = [
                 client.V1ServicePort(
                     protocol = "TCP",
-                    port = 25565,
-                    target_port = "primary"
+                    port = port,
+                    target_port = target_port
                 )
             ])
     )
@@ -119,8 +119,8 @@ def deploy_statefulset(apps_v1_api, id, game, ram_gb, disk_gb):
 
     apps_v1_api.create_namespaced_stateful_set(namespace = "default", body = statefulset)
 
-def deploy_service(core_v1_api, id):
-    service = create_service(id)
+def deploy_service(core_v1_api, id, port, target_port):
+    service = create_service(id, port, target_port)
 
     core_v1_api.create_namespaced_service(namespace = "default", body = service)
 

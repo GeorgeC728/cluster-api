@@ -18,7 +18,7 @@ def create_server(id):
     # Function to create server
     #k8s.create_service(api_client, "minecraft")
     k8s.deploy_statefulset(apps_v1_api, id = str(id), game = "minecraft", ram_gb = 2, disk_gb = "5")
-    k8s.deploy_service(core_v1_api, str(id))
+    k8s.deploy_service(core_v1_api, id = str(id), port = 25565, target_port = "primary")
 
     return({"success": "much"})
 
