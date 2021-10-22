@@ -48,7 +48,7 @@ def create_volume_claim(id, disk_gb):
     # Return the volume claim
     return(volume_claim)
 
-def create_pod_template_spec(id, game, ram_gb):
+def create_server_pod_template_spec(id, game, ram_gb):
     pod = client.V1PodTemplateSpec(
         metadata = client.V1ObjectMeta(
                 labels = {"app": "minecraft-id-" + id}
@@ -97,7 +97,7 @@ def create_statefulset_spec(id, game, ram_gb, disk_gb):
             match_labels = {"app": "minecraft-id-" + id}),
         service_name = "minecraft-id-" + id,
         replicas = 1,
-        template = create_pod_template_spec(id, game, ram_gb),
+        template = create_server_pod_template_spec(id, game, ram_gb),
         volume_claim_templates = [create_volume_claim(id, disk_gb)]
     )
 
