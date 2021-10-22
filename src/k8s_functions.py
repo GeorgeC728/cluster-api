@@ -1,4 +1,5 @@
-from kubernetes import client, config               # For interacting with k8s API
+from kubernetes import client, config
+from kubernetes.client.models.v1_container_port import V1ContainerPort               # For interacting with k8s API
 from misc_functions import *                        # Functions that I'm not sure where else to put
 
 # Create a service for a given server name
@@ -90,6 +91,46 @@ def create_server_pod_template_spec(id, game, ram_gb):
     # Return the pod spec
     return(pod)
 
+def create_sftp_pod_template_spec(id):
+    pod = client.V1PodTemplateSpec(
+        metadata = client.V1ObjectMeta(
+            labels = {"app": "sftp-id-" + id}
+        ),
+        spec = client.V1PodSpec(
+            volumes = [
+                client.V1Volume(
+                    name = "sftp-volume",
+                    persistent_volume_claim = client.V1PersistentVolumeClaimVolumeSource(
+                        claim_name = "minecraft-pvc-id-" + id + "minecraft-id-" + id + "-0"
+                    )
+                )
+            ],
+            containers = [
+                client.V1Container(
+                    name = "sftp-container-id-" + id,
+                    image = "atmoz/sftp:latest",
+                    args = ["user:pass:::data"],
+                    volume_mounts = [
+                        client.V1VolumeMount(
+                            name = "sftp-volume",
+                            mount_path = "/home/user/data"
+                            #sub_path to get rid of lost+found
+                        ),
+                    ],
+                    ports = [
+                        client.V1ContainerPort(
+                            name = "primary",
+                            container_port = 22,
+                            protocol = "TCP"
+                        )
+                    ]
+                )
+            ]
+        )
+    )
+
+    return(pod)
+
 def create_statefulset_spec(id, game, ram_gb, disk_gb):
 
     statefulset_spec = client.V1StatefulSetSpec(
@@ -103,6 +144,18 @@ def create_statefulset_spec(id, game, ram_gb, disk_gb):
 
     return(statefulset_spec)
 
+def create_sftp_deployment_spec(id):
+
+    deployment_spec = client.V1DeploymentSpec(
+        replicas = 1,
+        selector = client.V1LabelSelector(
+            match_labels = {"app": "sftp-id-" + id}
+        ),
+        template = create_sftp_pod_template_spec(id)
+    )
+
+    return(deployment_spec)
+
 def create_statefulset(id, game, ram_gb, disk_gb):
 
     statefulset = client.V1StatefulSet(
@@ -114,15 +167,31 @@ def create_statefulset(id, game, ram_gb, disk_gb):
 
     return(statefulset)
 
+def create_sftp_deployment(id):
+
+    deployment = client.V1Deployment(
+        api_version = "apps/v1",
+        kind = "Deployment",
+        metadata = client.V1ObjectMeta(name = "sftp-id-" + id),
+        spec = create_sftp_deployment_spec
+    )
+
+    return(deployment)
+
 def deploy_statefulset(apps_v1_api, id, game, ram_gb, disk_gb):
     statefulset = create_statefulset(id, game, ram_gb, disk_gb)
 
-    apps_v1_api.create_namespaced_stateful_set(namespace = "default", body = statefulset)
+    client.AppsV1Api().create_namespaced_stateful_set(namespace = "default", body = statefulset)
 
 def deploy_service(core_v1_api, id, port, target_port):
     service = create_service(id, port, target_port)
 
-    core_v1_api.create_namespaced_service(namespace = "default", body = service)
+    client.CoreV1Api().create_namespaced_service(namespace = "default", body = service)
+
+def deploy_sftp_deployment(apps_v1_api, id):
+    deployment = create_sftp_deployment(id)
+
+    client.AppsV1Api().create_namespaced_deployment(namespace = "default", body = deployment)
 
 def scale_statefulset(apps_v1_api, id, replicas_count):
     apps_v1_api.patch_namespaced_stateful_set_scale(
