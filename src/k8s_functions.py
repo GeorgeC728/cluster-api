@@ -3,7 +3,7 @@ from kubernetes.client.models.v1_container_port import V1ContainerPort          
 from misc_functions import *                        # Functions that I'm not sure where else to put
 
 # Create a service for a given server name
-def create_service(id, port, target_port):
+def create_service(id, svc_name, port, target_port):
     service = client.V1Service(
         # Set API version
         api_version = "v1",
@@ -11,12 +11,12 @@ def create_service(id, port, target_port):
         kind = "Service",
         # Create metadata
         metadata = client.V1ObjectMeta(
-            name = "minecraft-id-" + id,
-            labels = {"app": "minecraft-id-" + id}),
+            name = svc_name + "-id-" + id,
+            labels = {"app": svc_name + "-id-" + id}),
         # Create service spec
         spec = client.V1ServiceSpec(
             type = "NodePort",
-            selector = {"app": "minecraft-id-" + id},
+            selector = {"app": svc_name + "-id-" + id},
             ports = [
                 client.V1ServicePort(
                     protocol = "TCP",
@@ -101,7 +101,7 @@ def create_sftp_pod_template_spec(id):
                 client.V1Volume(
                     name = "sftp-volume",
                     persistent_volume_claim = client.V1PersistentVolumeClaimVolumeSource(
-                        claim_name = "minecraft-pvc-id-" + id + "minecraft-id-" + id + "-0"
+                        claim_name = "minecraft-pvc-id-" + id + "-minecraft-id-" + id + "-0"
                     )
                 )
             ],
@@ -173,7 +173,7 @@ def create_sftp_deployment(id):
         api_version = "apps/v1",
         kind = "Deployment",
         metadata = client.V1ObjectMeta(name = "sftp-id-" + id),
-        spec = create_sftp_deployment_spec
+        spec = create_sftp_deployment_spec(id)
     )
 
     return(deployment)
@@ -183,8 +183,8 @@ def deploy_statefulset(apps_v1_api, id, game, ram_gb, disk_gb):
 
     client.AppsV1Api().create_namespaced_stateful_set(namespace = "default", body = statefulset)
 
-def deploy_service(core_v1_api, id, port, target_port):
-    service = create_service(id, port, target_port)
+def deploy_service(core_v1_api, id, svc_name, port, target_port):
+    service = create_service(id, svc_name, port, target_port)
 
     client.CoreV1Api().create_namespaced_service(namespace = "default", body = service)
 
