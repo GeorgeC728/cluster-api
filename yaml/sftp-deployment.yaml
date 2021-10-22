@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sftp-6
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sftp-6
+  template:
+    metadata:
+      labels:
+        app: sftp-6
+    spec:
+      #volumes:
+      #- name: server-volume
+      #  persistentVolumeClaim:
+      #    claimName: minecraft-pvc-id-6-minecraft-id-6-0
+      containers:
+      - name: sftp-6
+        image: atmoz/sftp:latest
+        args: ["foo:pass:::upload"]
+        ports:
+        - name: sftp-primary
+          containerPort: 22
+        #volumeMounts:
+        #- mountPath: "/home/foo/upload"
+        #  name: server-volume
