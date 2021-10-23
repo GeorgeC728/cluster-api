@@ -3,20 +3,31 @@ from flask import Flask                             # Flask library required for
 from flask.blueprints import Blueprint              # Blueprint from flask for registerin API calls
 from kubernetes import client, config               # For interface with k8s API
 import k8s_functions as k8s
+from os import getenv
 
 # Blueprint for this set of calls
 k8s_calls = Blueprint("k8s_calls", __name__)
 
-
-config.load_kube_config()
+# Authenticate with k8s API
+k8s.authenticate()
 
 core_v1_api = client.CoreV1Api()
 apps_v1_api = client.AppsV1Api()
 
+def authenticate():
+    ENVIRONMENT = getenv("ENVIRONMENT")
+    if ENVIRONMENT == "prod":
+        config.load_incluster_config()
+        return({"success": True})
+    elif ENVIRONMENT == "dev":
+        config.load_kube_config()
+        return({"success": True})
+    else:
+        return({"success": False})
+
 @k8s_calls.route("/api/v1/server/<id>/create", methods = ["GET"])
 def create_server(id):
     # Function to create server
-    #k8s.create_service(api_client, "minecraft")
     k8s.deploy_statefulset(apps_v1_api, id = str(id), game = "minecraft", ram_gb = 2, disk_gb = "5")
     k8s.deploy_service(core_v1_api, id = str(id), svc_name = "minecraft-svc", port = 25565, target_port = "primary")
 

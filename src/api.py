@@ -1,8 +1,15 @@
 # Load libraries
+# Libraries
 from flask import Flask             # Flask libraries required for API
-from healthcheck import *            # Import all calls from healthcall
-from k8s_calls import *
+from healthcheck import *           # Import all calls from healthcall
+from dotenv import load_dotenv      # Import env variables from .env
+import os                           # Call env variables
+# Custom scripts
+from k8s_calls import *             # Interfacing with k8s API
 
+# Load .env
+load_dotenv()
+authenticate()
 # Create api object
 api = Flask(__name__)
 
