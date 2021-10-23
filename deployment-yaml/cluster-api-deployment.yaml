@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  selector:
+    matchLabels:
+      app: api
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+      - name: api-container
+        image: eu.gcr.io/server-hosting-303517/gameserver-cluster-api:latest
+        ports:
+        - name: primary
+          containerPort: 50
+        volumeMounts:
+        - mountPath: /api/.env
+          name: env-file
+          subPath: .env
+      volumes:
+        - name: env-file
+          configMap:
+            name: api-env
