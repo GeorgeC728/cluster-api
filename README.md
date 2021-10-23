@@ -1,13 +1,13 @@
 # Game server cluster design
 
-The game server cluster is where the customers servers will sit. Game servers will be deployed as stateful sets consisting of a single pod which will have a single container. Nodes will host DaemonSets providing SFTP access to the game server disks. A REST API will sit in the cluster providing calls to create and manage the servers.
+The game server cluster is where the customers servers will sit. Game servers will be deployed as stateful sets consisting of a single pod which will have a single container. Nodes will host DaemonSets providing SFTP access to the game server disks. A REST API will sit in the cluster providing calls to p and manage the servers.
 
 API:
 - Deployment
 - Single container, multiple replicas.
 - Autoscale with demand
 - Python/Flask
-- Will create and manage the servers.
+- Will p and manage the servers.
 
 Gameservers:
 - Statefulset
@@ -41,18 +41,41 @@ This can be used to ensure that the API is up and able to accept requests.
 
 |||
 |---|---|
-|Path|/api/v1/server/id/create|
+|Path|/api/v1/server/`id`/p|
 |Method|POST|
-|Parameters|`{game:, ram_gb:, disk_gb:}`|
+|Parameters|`{ram_gb:, disk_gb:}`|
 |Returns|`{success: True}`|
 
+Creates a server - just minecraft at the moment.
 
+### Start server
 
+|||
+|---|---|
+|Path|/api/v1/server/`id`/start|
+|Method|PATCH|
+|Parameters||
+|Returns|`{success: True}`|
+
+Starts the server associated with the id
+
+### Stop server
+
+|||
+|---|---|
+|Path|/api/v1/server/`id`/stop|
+|Method|PATCH|
+|Parameters||
+|Returns|`{success: True}`|
+
+Stops the server associated with the id
 
 ## Variable glossary
 
 |Variable|Data type|Accepted values|Description|
 |---|---|---|---|
 |success|bool|True, False|Whether the request was successful|
-|id|int||The ID of the server|
-|game|str|minecraft, rust| The name of the game|
+|id|int||The ID of the server - accepts int but currently converted to string when used|
+|game|str|minecraft| The name of the game|
+|ram_gb|int||The ram for the server in GB|
+|disk_gb|int||The disk space for the server in GB|
