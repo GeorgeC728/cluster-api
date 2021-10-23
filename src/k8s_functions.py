@@ -207,34 +207,33 @@ def create_sftp_deployment(id):
 
     return(deployment)
 
+# Deploy a statefulset for a gameserver
 def deploy_statefulset(id, game, ram_gb, disk_gb):
+    # Get the statefulset object
     statefulset = create_statefulset(id, game, ram_gb, disk_gb)
-
+    # Deploy it
     client.AppsV1Api().create_namespaced_stateful_set(namespace = "default", body = statefulset)
 
+# Deploy a service - this will do both servers and sftp
 def deploy_service(id, svc_name, port, target_port):
+    # Create the service
     service = create_service(id, svc_name, port, target_port)
-
+    # Deploy it
     client.CoreV1Api().create_namespaced_service(namespace = "default", body = service)
 
+# Deploy a deployment for an sftp handler
 def deploy_sftp_deployment(id):
+    # Create the deployment
     deployment = create_sftp_deployment(id)
-
+    # Deploy it
     client.AppsV1Api().create_namespaced_deployment(namespace = "default", body = deployment)
 
+# Scale a statefulset - used for turning on/off
 def scale_statefulset(id, replicas_count):
-    
+    # Patch a the given object and change the number of replicas.
     client.AppsV1Api().patch_namespaced_stateful_set_scale(
         namespace = "default",
         name = "minecraft-id-" + id,
+        # Use plain ol' dict as thats what is needed
         body = {"spec":{"replicas":replicas_count}}
-        #body = client.V1StatefulSet(
-        #    spec = client.V1StatefulSetSpec(
-        #        #selector = client.V1LabelSelector(
-        #        #    match_labels = {"app": "minecraft-id-" + id}),
-        #        replicas = replicas_count))
     )
-    #apps_v1_api.patch_namespaced_stateful_set_scale(
-    #    namespace = "default",
-    #    body = {"spec":{"replicas":replicas_count}}
-    #)
