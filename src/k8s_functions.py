@@ -178,23 +178,24 @@ def create_sftp_deployment(id):
 
     return(deployment)
 
-def deploy_statefulset(apps_v1_api, id, game, ram_gb, disk_gb):
+def deploy_statefulset(id, game, ram_gb, disk_gb):
     statefulset = create_statefulset(id, game, ram_gb, disk_gb)
 
     client.AppsV1Api().create_namespaced_stateful_set(namespace = "default", body = statefulset)
 
-def deploy_service(core_v1_api, id, svc_name, port, target_port):
+def deploy_service(id, svc_name, port, target_port):
     service = create_service(id, svc_name, port, target_port)
 
     client.CoreV1Api().create_namespaced_service(namespace = "default", body = service)
 
-def deploy_sftp_deployment(apps_v1_api, id):
+def deploy_sftp_deployment(id):
     deployment = create_sftp_deployment(id)
 
     client.AppsV1Api().create_namespaced_deployment(namespace = "default", body = deployment)
 
-def scale_statefulset(apps_v1_api, id, replicas_count):
-    apps_v1_api.patch_namespaced_stateful_set_scale(
+def scale_statefulset(id, replicas_count):
+    
+    client.AppsV1Api().patch_namespaced_stateful_set_scale(
         namespace = "default",
         name = "minecraft-id-" + id,
         body = {"spec":{"replicas":replicas_count}}
