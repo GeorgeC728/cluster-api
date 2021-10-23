@@ -8,8 +8,6 @@ from os import getenv
 # Blueprint for this set of calls
 k8s_calls = Blueprint("k8s_calls", __name__)
 
-# Authenticate with k8s API
-k8s.authenticate()
 
 core_v1_api = client.CoreV1Api()
 apps_v1_api = client.AppsV1Api()
