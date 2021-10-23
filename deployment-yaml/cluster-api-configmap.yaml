@@ -4,4 +4,4 @@ metadata:
   name: api-env
 data:
   .env: |
-    ENVIRONMENT=PROD
+    ENVIRONMENT=prod
