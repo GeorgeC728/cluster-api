@@ -42,7 +42,7 @@ def create_volume_claim(id, disk_gb):
             storage_class_name = "ssd-disk",
             resources = client.V1ResourceRequirements(
                 # Request storage of required size
-                requests = {"storage": disk_gb + "Gi"}
+                requests = {"storage": str(disk_gb) + "Gi"}
             )
         )
     )

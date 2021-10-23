@@ -1,5 +1,5 @@
 # Load libraries
-from flask import Flask                             # Flask library required for API
+from flask import Flask, request                    # Flask library required for API
 from flask.blueprints import Blueprint              # Blueprint from flask for registerin API calls
 from kubernetes import client, config               # For interface with k8s API
 import k8s_functions as k8s
@@ -23,16 +23,39 @@ def authenticate():
     else:
         return({"success": False})
 
-@k8s_calls.route("/api/v1/server/<id>/create", methods = ["GET"])
+# Create a server
+@k8s_calls.route("/api/v1/server/<id>/create", methods = ["POST"])
 def create_server(id):
-    # Function to create server
-    k8s.deploy_statefulset(apps_v1_api, id = str(id), game = "minecraft", ram_gb = 2, disk_gb = "5")
-    k8s.deploy_service(core_v1_api, id = str(id), svc_name = "minecraft-svc", port = 25565, target_port = "primary")
+    # Convert the request into json
+    data = request.get_json()
 
-    k8s.deploy_sftp_deployment(apps_v1_api, id = str(id)),
-    k8s.deploy_service(core_v1_api, id = str(id), svc_name = "sftp", port = 22, target_port = "primary")
+    # Create statefulset (server)
+    k8s.deploy_statefulset(
+        apps_v1_api,
+        id = str(id),
+        game = "minecraft",
+        ram_gb = data["ram_gb"],
+        disk_gb = data["disk_gb"])
+    # Depley service for the server
+    k8s.deploy_service(
+        core_v1_api,
+        id = str(id),
+        svc_name = "minecraft-svc",
+        port = 25565,
+        target_port = "primary")
+    # Create deployment for SFTP
+    k8s.deploy_sftp_deployment(
+        apps_v1_api,
+        id = str(id))
+    # Deploy service for SFTP
+    k8s.deploy_service(
+        core_v1_api,
+        id = str(id),
+        svc_name = "sftp",
+        port = 22,
+        target_port = "primary")
 
-    return({"success": "much"})
+    return({"success": True})
 
 @k8s_calls.route("/api/v1/server/<id>/stop", methods = ["GET"])
 def stop_server(id):

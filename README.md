@@ -20,3 +20,39 @@ File access:
 - Not sure how to attach pods
 
 # Cluster API
+
+## API management
+
+This section includes the API calls that are used to manage the API itself
+
+### Healthcheck
+
+|||
+|---|---|
+|Path|/healthcheck|
+|Parameters||
+|Returns|`{alive:True}`|
+
+This can be used to ensure that the API is up and able to accept requests.
+
+## Creating and removing servers
+
+### Create server
+
+|||
+|---|---|
+|Path|/api/v1/server/id/create|
+|Method|POST|
+|Parameters|`{game:, ram_gb:, disk_gb:}`|
+|Returns|`{success: True}`|
+
+
+
+
+## Variable glossary
+
+|Variable|Data type|Accepted values|Description|
+|---|---|---|---|
+|success|bool|True, False|Whether the request was successful|
+|id|int||The ID of the server|
+|game|str|minecraft, rust| The name of the game|
