@@ -36,12 +36,20 @@ def create_server(id):
         game = "minecraft",
         ram_gb = data["ram_gb"],
         disk_gb = data["disk_gb"])
-    # Depley service for the server
+    # Deploy service for the server
     k8s.deploy_service(
         id = str(id),
-        svc_name = "minecraft",
+        svc_name = "minecraft-primary-",
+        target_name = "minecraft-id-",
         port = 25565,
         target_port = "primary")
+    # Deploy service for RCON
+    k8s.deploy_service(
+        id = str(id),
+        svc_name = "minecraft-rcon-",
+        target_name = "minecraft-id-",
+        port = 25575,
+        target_port = "rcon")
     # Create deployment for SFTP
     k8s.deploy_sftp_deployment(
         id = str(id))
@@ -49,6 +57,7 @@ def create_server(id):
     k8s.deploy_service(
         id = str(id),
         svc_name = "sftp",
+        target_name = "sftp-",
         port = 22,
         target_port = "primary")
 
@@ -85,7 +94,12 @@ def delete_server(id):
         )
     # Delete the server service
     client.CoreV1Api().delete_namespaced_service(
-        name = "minecraft-id-" + str(id),
+        name = "minecraft-primary-" + str(id),
+        namespace = "default"
+        )
+    # Delete the server rcon service
+    client.CoreV1Api().delete_namespaced_service(
+        name = "minecraft-rcon-" + str(id),
         namespace = "default"
         )
     # Delete the sftp service

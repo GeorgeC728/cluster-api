@@ -3,7 +3,7 @@ from kubernetes.client.models.v1_container_port import V1ContainerPort          
 from misc_functions import *                        # Functions that I'm not sure where else to put
 
 # Create a service for a given server name
-def create_service(id, svc_name, port, target_port):
+def create_service(id, svc_name, target_name, port, target_port):
     service = client.V1Service(
         # Set API version
         api_version = "v1",
@@ -11,12 +11,12 @@ def create_service(id, svc_name, port, target_port):
         kind = "Service",
         # Create metadata
         metadata = client.V1ObjectMeta(
-            name = svc_name + "-id-" + id,
-            labels = {"app": svc_name + "-id-" + id}),
+            name = svc_name + id,
+            labels = {"app": target_name + id}),
         # Create service spec
         spec = client.V1ServiceSpec(
             type = "NodePort",
-            selector = {"app": svc_name + "-id-" + id},
+            selector = {"app": target_name + id},
             ports = [
                 client.V1ServicePort(
                     protocol = "TCP",
@@ -215,9 +215,9 @@ def deploy_statefulset(id, game, ram_gb, disk_gb):
     client.AppsV1Api().create_namespaced_stateful_set(namespace = "default", body = statefulset)
 
 # Deploy a service - this will do both servers and sftp
-def deploy_service(id, svc_name, port, target_port):
+def deploy_service(id, svc_name, target_name, port, target_port):
     # Create the service
-    service = create_service(id, svc_name, port, target_port)
+    service = create_service(id, svc_name, target_name, port, target_port)
     # Deploy it
     client.CoreV1Api().create_namespaced_service(namespace = "default", body = service)
 
