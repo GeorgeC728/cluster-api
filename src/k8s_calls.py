@@ -13,7 +13,7 @@ config.load_kube_config()
 core_v1_api = client.CoreV1Api()
 apps_v1_api = client.AppsV1Api()
 
-@k8s_calls.route("/v1/server/<id>/create", methods = ["GET"])
+@k8s_calls.route("/api/v1/server/<id>/create", methods = ["GET"])
 def create_server(id):
     # Function to create server
     #k8s.create_service(api_client, "minecraft")
@@ -25,14 +25,14 @@ def create_server(id):
 
     return({"success": "much"})
 
-@k8s_calls.route("/v1/server/<id>/stop", methods = ["GET"])
+@k8s_calls.route("/api/v1/server/<id>/stop", methods = ["GET"])
 def stop_server(id):
     k8s.scale_statefulset(apps_v1_api, str(id), 0)
 
-    return{"success": "much"}
+    return({"success": "much"})
 
-@k8s_calls.route("/v1/server/<id>/start", methods = ["GET"])
+@k8s_calls.route("/api/v1/server/<id>/start", methods = ["GET"])
 def start_server(id):
     k8s.scale_statefulset(apps_v1_api, str(id), 1)
 
-    return{"success": "much"}
+    return({"success": "much"})
