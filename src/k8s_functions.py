@@ -42,30 +42,38 @@ def create_volume_claim(id, disk_gb):
             storage_class_name = "ssd-disk",
             resources = client.V1ResourceRequirements(
                 # Request storage of required size
-                requests = {"storage": disk_gb + "Gi"}
+                requests = {"storage": str(disk_gb) + "Gi"}
             )
         )
     )
     # Return the volume claim
     return(volume_claim)
 
+# pod template spec for gameservers
 def create_server_pod_template_spec(id, game, ram_gb):
     pod = client.V1PodTemplateSpec(
         metadata = client.V1ObjectMeta(
+                # Create unique name
                 labels = {"app": "minecraft-id-" + id}
             ),
         spec = client.V1PodSpec(
+            # Short termination period - probs increase in prob
             termination_grace_period_seconds = 10,
             containers = [
+                # Just the one container
                 client.V1Container(
                     name = "minecraft-container-id-" + id,
+                    # Get the image name
                     image = get_image_name(game),
+                    # Mount a persistent volume so worlds are saved
                     volume_mounts = [
                         client.V1VolumeMount(
                             name = "minecraft-pvc-id-" + id,
+                            # This is where the container saves world data
                             mount_path = "/data/server"
                         )
                     ],
+                    # Env variables - just memory for now as its needed but defo have more later on
                     env = [
                         client.V1EnvVar(
                             name = "MEMORY",
@@ -73,14 +81,16 @@ def create_server_pod_template_spec(id, game, ram_gb):
                         )
                     ],
                     ports = [
+                        # Port for accessing server
                         client.V1ContainerPort(
                             name = "primary",
                             container_port = 25565,
                             protocol = "TCP"
                         ),
+                        # Port for RCON
                         client.V1ContainerPort(
                             name = "rcon",
-                            container_port = 25566,
+                            container_port = 25575,
                             protocol = "TCP"
                         )
                     ]
@@ -91,13 +101,16 @@ def create_server_pod_template_spec(id, game, ram_gb):
     # Return the pod spec
     return(pod)
 
+# Create pod template for the SFTP handler
 def create_sftp_pod_template_spec(id):
     pod = client.V1PodTemplateSpec(
         metadata = client.V1ObjectMeta(
+            # Unique name for the pod
             labels = {"app": "sftp-id-" + id}
         ),
         spec = client.V1PodSpec(
             volumes = [
+                # Add the volume from the gameserver 
                 client.V1Volume(
                     name = "sftp-volume",
                     persistent_volume_claim = client.V1PersistentVolumeClaimVolumeSource(
@@ -106,10 +119,12 @@ def create_sftp_pod_template_spec(id):
                 )
             ],
             containers = [
+                # Just one cotnainer of the atmoz/sftp image
                 client.V1Container(
                     name = "sftp-container-id-" + id,
                     image = "atmoz/sftp:latest",
                     args = ["user:pass:::data"],
+                    # Mount the disk
                     volume_mounts = [
                         client.V1VolumeMount(
                             name = "sftp-volume",
@@ -118,6 +133,7 @@ def create_sftp_pod_template_spec(id):
                         ),
                     ],
                     ports = [
+                        # Primary port for sftp access
                         client.V1ContainerPort(
                             name = "primary",
                             container_port = 22,
@@ -128,83 +144,96 @@ def create_sftp_pod_template_spec(id):
             ]
         )
     )
-
+    # Return the object
     return(pod)
 
+# Spec for gameservers
 def create_statefulset_spec(id, game, ram_gb, disk_gb):
 
     statefulset_spec = client.V1StatefulSetSpec(
+        # Add unique selector/name
         selector = client.V1LabelSelector(
             match_labels = {"app": "minecraft-id-" + id}),
         service_name = "minecraft-id-" + id,
+        # One replica - don't want more than one gameserver per set
         replicas = 1,
+        # Generate template spec
         template = create_server_pod_template_spec(id, game, ram_gb),
+        # Genearte colume claim
         volume_claim_templates = [create_volume_claim(id, disk_gb)]
     )
-
+    # Return the object
     return(statefulset_spec)
 
+# Spec for SFTP deployment
 def create_sftp_deployment_spec(id):
-
     deployment_spec = client.V1DeploymentSpec(
+        # Just one replica - could use more but probs not wise/necesary
         replicas = 1,
         selector = client.V1LabelSelector(
             match_labels = {"app": "sftp-id-" + id}
         ),
+        # Generate pod spec
         template = create_sftp_pod_template_spec(id)
     )
-
+    # Return object
     return(deployment_spec)
 
+# Create the gamesverer - this will be deployed
 def create_statefulset(id, game, ram_gb, disk_gb):
 
     statefulset = client.V1StatefulSet(
         api_version = "apps/v1",
         kind = "StatefulSet",
+        # Unique name
         metadata = client.V1ObjectMeta(name = "minecraft-id-" + id),
+        # Generate spec for server
         spec = create_statefulset_spec(id, game, ram_gb, disk_gb)
     )
-
+    # Return object
     return(statefulset)
 
+# Greate sftp deployment - this will be deployed
 def create_sftp_deployment(id):
 
     deployment = client.V1Deployment(
         api_version = "apps/v1",
         kind = "Deployment",
+        # Unique name
         metadata = client.V1ObjectMeta(name = "sftp-id-" + id),
+        # Generate spec
         spec = create_sftp_deployment_spec(id)
     )
 
     return(deployment)
 
-def deploy_statefulset(apps_v1_api, id, game, ram_gb, disk_gb):
+# Deploy a statefulset for a gameserver
+def deploy_statefulset(id, game, ram_gb, disk_gb):
+    # Get the statefulset object
     statefulset = create_statefulset(id, game, ram_gb, disk_gb)
-
+    # Deploy it
     client.AppsV1Api().create_namespaced_stateful_set(namespace = "default", body = statefulset)
 
-def deploy_service(core_v1_api, id, svc_name, port, target_port):
+# Deploy a service - this will do both servers and sftp
+def deploy_service(id, svc_name, port, target_port):
+    # Create the service
     service = create_service(id, svc_name, port, target_port)
-
+    # Deploy it
     client.CoreV1Api().create_namespaced_service(namespace = "default", body = service)
 
-def deploy_sftp_deployment(apps_v1_api, id):
+# Deploy a deployment for an sftp handler
+def deploy_sftp_deployment(id):
+    # Create the deployment
     deployment = create_sftp_deployment(id)
-
+    # Deploy it
     client.AppsV1Api().create_namespaced_deployment(namespace = "default", body = deployment)
 
-def scale_statefulset(apps_v1_api, id, replicas_count):
-    apps_v1_api.patch_namespaced_stateful_set_scale(
+# Scale a statefulset - used for turning on/off
+def scale_statefulset(id, replicas_count):
+    # Patch a the given object and change the number of replicas.
+    client.AppsV1Api().patch_namespaced_stateful_set_scale(
         namespace = "default",
         name = "minecraft-id-" + id,
+        # Use plain ol' dict as thats what is needed
         body = {"spec":{"replicas":replicas_count}}
-        #body = client.V1StatefulSet(
-        #    spec = client.V1StatefulSetSpec(
-        #        #selector = client.V1LabelSelector(
-        #        #    match_labels = {"app": "minecraft-id-" + id}),
-        #        replicas = replicas_count))
     )
-    #apps_v1_api.patch_namespaced_stateful_set_scale(
-    #    namespace = "default",
-    #    body = {"spec":{"replicas":replicas_count}}
-    #)
