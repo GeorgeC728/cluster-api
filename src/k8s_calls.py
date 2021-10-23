@@ -39,7 +39,7 @@ def create_server(id):
     # Depley service for the server
     k8s.deploy_service(
         id = str(id),
-        svc_name = "minecraft-svc",
+        svc_name = "minecraft",
         port = 25565,
         target_port = "primary")
     # Create deployment for SFTP
@@ -68,4 +68,35 @@ def start_server(id):
     # Scale statefulset to 1 to turn back on
     k8s.scale_statefulset(str(id), 1)
 
+    return({"success": True})
+
+# Delete server
+@k8s_calls.route("/api/v1/server/<id>/delete", methods = ["DELETE"])
+def delete_server(id):
+    # Delete the server
+    client.AppsV1Api().delete_namespaced_stateful_set(
+        name = "minecraft-id-" + str(id),
+        namespace = "default"
+        )
+    # Delete sftp
+    client.AppsV1Api().delete_namespaced_deployment(
+        name = "sftp-id-" + str(id),
+        namespace = "default"
+        )
+    # Delete the server service
+    client.CoreV1Api().delete_namespaced_service(
+        name = "minecraft-id-" + str(id),
+        namespace = "default"
+        )
+    # Delete the sftp service
+    client.CoreV1Api().delete_namespaced_service(
+        name = "sftp-id-" + str(id),
+        namespace = "default"
+        )
+    # Delete the pvc
+    client.CoreV1Api().delete_namespaced_persistent_volume_claim(
+        name = "minecraft-pvc-id-" + str(id) + "-minecraft-id-" + str(id) + "-0",
+        namespace = "default"
+        )
+    
     return({"success": True})
