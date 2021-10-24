@@ -70,6 +70,17 @@ Starts the server associated with the id
 
 Stops the server associated with the id
 
+### Restart server
+
+|||
+|---|---|
+|Path|/api/v1/server/`id`/restart|
+|Method|PATCH|
+|Parameters||
+|Returns|`{success: True}`|
+
+Restart the server associated with the id
+
 ### Ports
 
 |||
