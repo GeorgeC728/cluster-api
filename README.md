@@ -70,6 +70,16 @@ Starts the server associated with the id
 
 Stops the server associated with the id
 
+### Ports
+
+|||
+|---|---|
+|Path|/api/v1/server/`id`/port/`type`|
+|Method|PATCH|
+|Parameters|`type` takes either `primary` for the main gameserver port, `rcon` for the rcon port and `stp` for the sftp port|
+|Returns|`{success: True, "port":}`|
+
+
 ## Variable glossary
 
 |Variable|Data type|Accepted values|Description|
