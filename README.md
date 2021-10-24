@@ -77,7 +77,7 @@ Stops the server associated with the id
 |Path|/api/v1/server/`id`/port/`type`|
 |Method|PATCH|
 |Parameters|`type` takes either `primary` for the main gameserver port, `rcon` for the rcon port and `stp` for the sftp port|
-|Returns|`{success: True, "port":}`|
+|Returns|`{success: True, port:}`|
 
 
 ## Variable glossary
