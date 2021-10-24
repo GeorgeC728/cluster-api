@@ -5,5 +5,5 @@ metadata:
   name: cluster-api
 rules:
 - apiGroups: ["", "apps"]
-  resources: ["services", "statefulsets", "deployments", "pods", "configmaps"]
+  resources: ["services", "statefulsets", "statefulsets/scale", "deployments", "pods", "configmaps"]
   verbs: ["get", "create", "update", "patch", "delete"]
