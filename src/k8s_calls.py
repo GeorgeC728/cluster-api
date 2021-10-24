@@ -115,33 +115,6 @@ def delete_server(id):
     
     return({"success": True})
 
-# Get the port that the server is running on
-@k8s_calls.route("/api/v1/server/<id>/get-server-port", methods = ["GET"])
-def get_server_port(id):
-    # Get object representing the service
-    service = client.CoreV1Api().read_namespaced_service(
-        name = "minecraft-primary-" + id,
-        namespace = "default")
-    
-    # Extract the port from the service object
-    port = service.spec.ports[0].node_port
-    
-    # Return
-    return({"success": True, "port": port})
-
-# Get the port that the rcon is running on
-@k8s_calls.route("/api/v1/server/<id>/get-rcon-port", methods = ["GET"])
-def get_rcon_port(id):
-    # Get object representing the service
-    service = client.CoreV1Api().read_namespaced_service(
-        name = "minecraft-rcon-" + id,
-        namespace = "default")
-    
-    # Extract the port from the service object
-    port = service.spec.ports[0].node_port
-    
-    # Return
-    return({"success": True, "port": port})
 
 # Get the port that the server/rcon/sftp is running on
 @k8s_calls.route("/api/v1/server/<id>/port/<type>", methods = ["GET"])
