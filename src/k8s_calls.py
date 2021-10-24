@@ -145,3 +145,24 @@ def get_sftp_port(id, type):
     
     # Return
     return({"success": True, "port": port})
+
+@k8s_calls.route("/api/v1/server/<id>/status", methods = ["GET"])
+def get_status(id):
+    replicas_count = client.AppsV1Api().read_namespaced_stateful_set(
+        name = "minecraft-id-" + str(id),
+        namespace = "default"
+    ).spec.replicas
+
+    if replicas_count == 0:
+        return({"success": True, "status": "Not running"})
+    if replicas_count == 1:
+        status = client.CoreV1Api().read_namespaced_pod(
+            name = "minecraft-id-" + str(id) + "-0",
+            namespace = "default"
+        ).status.phase
+        return({"success": True, "status": status})
+    else:
+        return({"success": False})
+    
+
+    return({"success": False})
