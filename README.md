@@ -41,7 +41,7 @@ This can be used to ensure that the API is up and able to accept requests.
 
 |||
 |---|---|
-|Path|/api/v1/server/`id`/p|
+|Path|/api/v1/server/`id`/|
 |Method|POST|
 |Parameters|`{ram_gb:, disk_gb:}`|
 |Returns|`{success: True}`|
@@ -76,7 +76,7 @@ Stops the server associated with the id
 |---|---|
 |Path|/api/v1/server/`id`/port/`type`|
 |Method|PATCH|
-|Parameters|`type` takes either `primary` for the main gameserver port, `rcon` for the rcon port and `stp` for the sftp port|
+|Parameters|`type` takes either `primary` for the main gameserver port, `rcon` for the rcon port and `sftp` for the sftp port|
 |Returns|`{success: True, port:}`|
 
 
