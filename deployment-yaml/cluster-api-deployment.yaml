@@ -12,6 +12,7 @@ spec:
       labels:
         app: api
     spec:
+      serviceAccountName: cluster-api
       containers:
       - name: api-container
         image: eu.gcr.io/server-hosting-303517/gameserver-cluster-api:latest
