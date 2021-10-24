@@ -79,6 +79,14 @@ def start_server(id):
 
     return({"success": True})
 
+@k8s_calls.route("/api/v1/server/<id>/restart", methods = ["PATCH"])
+def restart_server(id):
+    # Restart can be done by just stopping and starting straight away
+    stop_server(id)
+    start_server(id)
+    # Return success
+    return({"success": True})
+
 # Delete server
 @k8s_calls.route("/api/v1/server/<id>/delete", methods = ["DELETE"])
 def delete_server(id):
