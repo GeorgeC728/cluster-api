@@ -255,8 +255,8 @@ def get_pod_usage(id):
     # Run the API call - no built in functions v sad
     pod_metrics_raw = client.ApiClient().call_api(
         # Path for the resource
-        resource_method = metric_api + "/minecraft-id-" + id + "-0",
-        method = "GET",
+        metric_api + "/minecraft-id-" + str(id) + "-0",
+        "GET",
         auth_settings = ['BearerToken'],
         response_type='json',
         _preload_content=False
