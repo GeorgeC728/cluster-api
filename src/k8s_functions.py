@@ -1,6 +1,7 @@
 from kubernetes import client, config
 from kubernetes.client.models.v1_container_port import V1ContainerPort               # For interacting with k8s API
 from misc_functions import *                        # Functions that I'm not sure where else to put
+import json
 
 # Create a service for a given server name
 def create_service(id, svc_name, target_name, port, target_port):
@@ -246,3 +247,23 @@ def scale_statefulset(id, replicas_count):
         # Use plain ol' dict as thats what is needed
         body = {"spec":{"replicas":replicas_count}}
     )
+
+# Returns the resource usage of a pod
+def get_usage(id):
+    # metric API path for a pod
+    metric_api = "/apis/metrics.k8s.io/v1beta1/namespaces/default/pods"
+    # Run the API call - no built in functions v sad
+    pod_metrics_raw = client.ApiClient().call_api(
+        # Path for the resource
+        resource_method = metric_api + "/minecraft-id-" + id + "-0",
+        method = "GET",
+        auth_settings = ['BearerToken'],
+        response_type='json',
+        _preload_content=False
+    ).data.decode('utf-8')
+
+    # Comes in plain text so convert and pull out what we want
+    pod_usage = json.loads(pod_metrics_raw)["containers"][0]["usage"]
+
+    # Return the dict
+    return(pod_usage)
