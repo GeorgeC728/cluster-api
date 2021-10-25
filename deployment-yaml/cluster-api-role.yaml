@@ -4,6 +4,6 @@ metadata:
   namespace: default
   name: cluster-api
 rules:
-- apiGroups: ["", "apps"]
+- apiGroups: ["", "apps", "metrics.k8s.io"]
   resources: ["services", "statefulsets", "statefulsets/scale", "deployments", "pods", "configmaps"]
   verbs: ["get", "create", "update", "patch", "delete"]
