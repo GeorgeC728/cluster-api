@@ -260,7 +260,7 @@ def get_pod_usage(id):
         auth_settings = ['BearerToken'],
         response_type='json',
         _preload_content=False
-    ).data.decode('utf-8')
+    )[0].data.decode('utf-8')
 
     # Comes in plain text so convert and pull out what we want
     pod_usage = json.loads(pod_metrics_raw)["containers"][0]["usage"]
