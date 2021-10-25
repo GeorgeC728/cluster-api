@@ -4,6 +4,7 @@ from flask.blueprints import Blueprint              # Blueprint from flask for r
 from kubernetes import client, config               # For interface with k8s API
 import k8s_functions as k8s
 from os import getenv
+from misc_functions import *
 
 # Blueprint for this set of calls
 k8s_calls = Blueprint("k8s_calls", __name__)
@@ -167,3 +168,34 @@ def get_status(id):
     
 
     return({"success": False})
+
+@k8s_calls("/api/v1/server/<id/usage")
+def get_usage(id):
+    # Usage stats
+    pod_usage = k8s.get_pod_usage(id)
+    # Limit stats
+    pod_limits = k8s.get_pod_limits(id)
+
+    # Create empty dict to store the return
+    resource_usage = dict()
+
+    # Get the CPU usage
+    cpu_usage = int(pod_usage["cpu"][0:-1]) * convert_to_vcpu(pod_usage["cpu"][-1])
+    # Store in return
+    resource_usage["cpu_usage"] = cpu_usage
+    # Get memory usage in GB
+    memory_usage = int(pod_usage["memory"][0:-2]) * convert_to_bytes(pod_usage["memory"][-2:]) / 2 ** 30
+    # Store in return
+    resource_usage["memory_usage_gb"] = memory_usage
+    # Get the CPU limits
+    cpu_limits = int(pod_limits["cpu"][0:-1]) * convert_to_vcpu(pod_usage["cpu"][1])
+    # Store in return
+    resource_usage["cpu_limits"] = cpu_limits
+    # Get memory limits in GB
+    memory_limits = int(pod_limits["memory"][0:-2]) * convert_to_bytes(pod_limits["memory"]) / 1e9
+    # Store in return
+    resource_usage["memory_limits_gb"] = memory_limits
+    # Store the success
+    resource_usage["success"] = True
+    # Return the memory usage
+    return(resource_usage)
