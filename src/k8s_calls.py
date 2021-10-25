@@ -169,7 +169,7 @@ def get_status(id):
 
     return({"success": False})
 
-@k8s_calls("/api/v1/server/<id/usage")
+@k8s_calls.route("/api/v1/server/<id>/usage", methods = ["GET"])
 def get_usage(id):
     # Usage stats
     pod_usage = k8s.get_pod_usage(id)
