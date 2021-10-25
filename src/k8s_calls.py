@@ -57,7 +57,7 @@ def create_server(id):
     k8s.deploy_service(
         id = str(id),
         svc_name = "sftp",
-        target_name = "sftp-",
+        target_name = "sftp-id-",
         port = 22,
         target_port = "primary")
 
