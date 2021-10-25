@@ -38,3 +38,14 @@ def convert_to_bytes(unit):
     
     # Return it
     return(bytes)
+
+# Convert vCPU units to orders of 1
+def convert_to_vcpu(unit):
+    if unit == "n":
+        vcpus = 1e-9
+    elif unit == "m":
+        vcpus = 1e-3
+    else:
+        vcpus = 1
+    
+    return(vcpus)
