@@ -267,3 +267,13 @@ def get_usage(id):
 
     # Return the dict
     return(pod_usage)
+
+# Returns the resource limits of a pod
+def get_pod_limits(id):
+    # Extract resource limits from the pod spec
+    resource_limits = client.CoreV1Api().read_namespaced_pod(
+        name = "minecraft-id-7-0",
+        namespace = "default").spec.containers[0].resources.limits
+    
+    # Return resource limits
+    return(resource_limits)
