@@ -10,3 +10,21 @@ def get_image_name(game):
     
     # Return None if not found - can use better error handling
     return(None)
+
+# Convert units like "Ki" to their power of two counterpart
+def convert_to_bytes(unit):
+    # 2 ** 10 = 1021 = 1 kb
+    if unit == "Ki":
+        bytes = 2 ** 10
+    elif unit == "Mi":
+        bytes = 2 ** 20
+    elif unit == "Gi":
+        bytes = 2 ** 30
+    elif unit == "Ti":
+        bytes = 2 ** 40
+    else:
+        # if not recognised there probably wasn't a unit supplied
+        bytes = 1
+    
+    # Return it
+    return(bytes)
