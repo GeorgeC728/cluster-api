@@ -78,6 +78,10 @@ def create_server_pod_template_spec(id, game, ram_gb):
                         client.V1EnvVar(
                             name = "MEMORY",
                             value = str(ram_gb * 1024)
+                        ),
+                        client.V1EnvVar(
+                            name = "RCON_PASSWORD",
+                            value = "pass"
                         )
                     ],
                     ports = [
