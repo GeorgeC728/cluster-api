@@ -112,7 +112,7 @@ def delete_server(id):
         )
     # Delete the sftp service
     client.CoreV1Api().delete_namespaced_service(
-        name = "sftp-id-" + str(id),
+        name = "sftp" + str(id),
         namespace = "default"
         )
     # Delete the pvc
