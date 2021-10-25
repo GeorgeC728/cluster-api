@@ -50,7 +50,7 @@ def create_volume_claim(id, disk_gb):
     return(volume_claim)
 
 # pod template spec for gameservers
-def create_server_pod_template_spec(id, game, ram_gb):
+def create_server_pod_template_spec(id, game, ram_gb, cpu_count):
     pod = client.V1PodTemplateSpec(
         metadata = client.V1ObjectMeta(
                 # Create unique name
@@ -65,6 +65,11 @@ def create_server_pod_template_spec(id, game, ram_gb):
                     name = "minecraft-container-id-" + id,
                     # Get the image name
                     image = get_image_name(game),
+                    resources = client.V1ResourceRequirements(
+                        limits = {
+                            "memory": str(ram_gb) + "G",
+                            "cpu": str(cpu_count * 1000) +"m"}
+                    ),
                     # Mount a persistent volume so worlds are saved
                     volume_mounts = [
                         client.V1VolumeMount(
@@ -77,7 +82,7 @@ def create_server_pod_template_spec(id, game, ram_gb):
                     env = [
                         client.V1EnvVar(
                             name = "MEMORY",
-                            value = str(ram_gb * 1024)
+                            value = str(round(ram_gb * 1024 * 0.8))
                         ),
                         client.V1EnvVar(
                             name = "RCON_PASSWORD",
@@ -152,7 +157,7 @@ def create_sftp_pod_template_spec(id):
     return(pod)
 
 # Spec for gameservers
-def create_statefulset_spec(id, game, ram_gb, disk_gb):
+def create_statefulset_spec(id, game, ram_gb, disk_gb, cpu_count):
 
     statefulset_spec = client.V1StatefulSetSpec(
         # Add unique selector/name
@@ -162,7 +167,7 @@ def create_statefulset_spec(id, game, ram_gb, disk_gb):
         # One replica - don't want more than one gameserver per set
         replicas = 1,
         # Generate template spec
-        template = create_server_pod_template_spec(id, game, ram_gb),
+        template = create_server_pod_template_spec(id, game, ram_gb, cpu_count),
         # Genearte colume claim
         volume_claim_templates = [create_volume_claim(id, disk_gb)]
     )
@@ -184,7 +189,7 @@ def create_sftp_deployment_spec(id):
     return(deployment_spec)
 
 # Create the gamesverer - this will be deployed
-def create_statefulset(id, game, ram_gb, disk_gb):
+def create_statefulset(id, game, ram_gb, disk_gb, cpu_count):
 
     statefulset = client.V1StatefulSet(
         api_version = "apps/v1",
@@ -192,7 +197,7 @@ def create_statefulset(id, game, ram_gb, disk_gb):
         # Unique name
         metadata = client.V1ObjectMeta(name = "minecraft-id-" + id),
         # Generate spec for server
-        spec = create_statefulset_spec(id, game, ram_gb, disk_gb)
+        spec = create_statefulset_spec(id, game, ram_gb, disk_gb, cpu_count)
     )
     # Return object
     return(statefulset)
@@ -212,9 +217,9 @@ def create_sftp_deployment(id):
     return(deployment)
 
 # Deploy a statefulset for a gameserver
-def deploy_statefulset(id, game, ram_gb, disk_gb):
+def deploy_statefulset(id, game, ram_gb, disk_gb, cpu_count):
     # Get the statefulset object
-    statefulset = create_statefulset(id, game, ram_gb, disk_gb)
+    statefulset = create_statefulset(id, game, ram_gb, disk_gb, cpu_count)
     # Deploy it
     client.AppsV1Api().create_namespaced_stateful_set(namespace = "default", body = statefulset)
 

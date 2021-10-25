@@ -35,7 +35,8 @@ def create_server(id):
         id = str(id),
         game = "minecraft",
         ram_gb = data["ram_gb"],
-        disk_gb = data["disk_gb"])
+        disk_gb = data["disk_gb"],
+        cpu_count = data["cpu_count"])
     # Deploy service for the server
     k8s.deploy_service(
         id = str(id),
