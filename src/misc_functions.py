@@ -1,3 +1,5 @@
+import re
+
 # Convert a gametype into an image name
 # This could utilise a config map so different values can be used in prod/dev etc.
 def get_image_name(game):
@@ -12,7 +14,14 @@ def get_image_name(game):
     return(None)
 
 # Convert units like "Ki" or "K" to bytes
-def convert_to_bytes(unit):
+def convert_to_bytes(value):
+
+    
+    if re.search("[a-zA-Z]+", value):
+        unit = re.search("[a-zA-Z]+", value).group(0)
+    else:
+        unit = ""
+
     # Ki is in powers of 2, 1024 bytes
     # K is SI, 1000 bytes
     if unit == "Ki":
@@ -37,10 +46,15 @@ def convert_to_bytes(unit):
         bytes = 1
     
     # Return it
-    return(bytes)
+    return(bytes * int(value.replace(unit, "")))
 
 # Convert vCPU units to orders of 1
-def convert_to_vcpu(unit):
+def convert_to_vcpu(value):
+    if re.search("[a-zA-Z]+", value):
+        unit = re.search("[a-zA-Z]+", value).group(0)
+    else:
+        unit = ""
+
     if unit == "n":
         vcpus = 1e-9
     elif unit == "m":
@@ -48,4 +62,4 @@ def convert_to_vcpu(unit):
     else:
         vcpus = 1
     
-    return(vcpus)
+    return(vcpus * int(value.replace(unit, "")))
