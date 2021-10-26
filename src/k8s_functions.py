@@ -76,7 +76,8 @@ def create_server_pod_template_spec(id, game, ram_gb, cpu_count):
                         client.V1VolumeMount(
                             name = "minecraft-pvc-id-" + id,
                             # This is where the container saves world data
-                            mount_path = "/data/server"
+                            mount_path = "/data/server",
+                            sub_path = "data"
                         )
                     ],
                     # Env variables - just memory for now as its needed but defo have more later on
@@ -138,8 +139,8 @@ def create_sftp_pod_template_spec(id):
                     volume_mounts = [
                         client.V1VolumeMount(
                             name = "sftp-volume",
-                            mount_path = "/home/user/data"
-                            #sub_path to get rid of lost+found
+                            mount_path = "/home/user/data",
+                            sub_path = "data"
                         ),
                     ],
                     ports = [
