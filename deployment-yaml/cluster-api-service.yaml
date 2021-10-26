@@ -9,5 +9,6 @@ spec:
   - protocol: TCP
     port: 50
     targetPort: primary
-  type: LoadBalancer
-  loadBalancerIP: 35.246.23.17
+  type: NodePort
+  #type: LoadBalancer
+  #loadBalancerIP: 35.246.23.17
