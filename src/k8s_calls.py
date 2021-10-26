@@ -180,19 +180,19 @@ def get_usage(id):
     resource_usage = dict()
 
     # Get the CPU usage
-    cpu_usage = int(pod_usage["cpu"][0:-1]) * convert_to_vcpu(pod_usage["cpu"][-1])
+    cpu_usage = convert_to_vcpu(pod_usage["cpu"])
     # Store in return
     resource_usage["cpu_usage"] = cpu_usage
     # Get memory usage in GB
-    memory_usage = int(pod_usage["memory"][0:-2]) * convert_to_bytes(pod_usage["memory"][-2:]) / 2 ** 30
+    memory_usage = convert_to_bytes(pod_usage["memory"]) / 2 ** 30
     # Store in return
     resource_usage["memory_usage_gb"] = memory_usage
     # Get the CPU limits
-    cpu_limits = int(pod_limits["cpu"][0:-1]) * convert_to_vcpu(pod_limits["cpu"][-1])
+    cpu_limits =  convert_to_vcpu(pod_limits["cpu"])
     # Store in return
     resource_usage["cpu_limits"] = cpu_limits
     # Get memory limits in GB
-    memory_limits = int(pod_limits["memory"][0:-1]) * convert_to_bytes(pod_limits["memory"][-1]) / 1e9
+    memory_limits = convert_to_bytes(pod_limits["memory"]) / 1e9
     # Store in return
     resource_usage["memory_limits_gb"] = memory_limits
     resource_usage["cpu_percent"] = cpu_usage / cpu_limits
