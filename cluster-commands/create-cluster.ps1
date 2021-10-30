@@ -1,4 +1,8 @@
-# Command to cretae cluster - doesn't allow for VPC native routing - can't see why we'd need
-#  --enable-ip-alias Might be useful to give each pod its own IP not using unless we need it
-gcloud container clusters create gameserver-cluster `
-    --region=europe-west2-c
+# Command to create cluster - one for everything atm
+gcloud container clusters create main-cluster `
+    --region=europe-west2-c `
+    --enable-ip-alias `
+    --num-nodes=1 `
+    --machine-type=e2-standard-4 `
+    --preemptible `
+    --disk-size=20
