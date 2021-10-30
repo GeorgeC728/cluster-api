@@ -5,4 +5,5 @@ gcloud container clusters create main-cluster `
     --num-nodes=1 `
     --machine-type=e2-standard-4 `
     --preemptible `
-    --disk-size=20
+    --disk-size=20 `
+    --tags=gameservers
