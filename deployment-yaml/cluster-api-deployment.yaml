@@ -17,6 +17,7 @@ spec:
       containers:
       - name: api-container
         image: eu.gcr.io/server-hosting-303517/gameserver-cluster-api:latest
+        imagePullPolicy: Always
         ports:
         - name: primary
           containerPort: 50
