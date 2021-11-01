@@ -5,5 +5,5 @@ metadata:
   name: cluster-api
 rules:
 - apiGroups: ["", "apps", "metrics.k8s.io"]
-  resources: ["services", "statefulsets", "statefulsets/scale", "deployments", "pods", "configmaps"]
+  resources: ["services", "statefulsets", "statefulsets/scale", "deployments", "pods", "configmaps", "persistentvolumeclaims" ]
   verbs: ["get", "create", "update", "patch", "delete"]

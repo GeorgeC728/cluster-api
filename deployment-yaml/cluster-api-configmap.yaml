@@ -6,3 +6,4 @@ metadata:
 data:
   .env: |
     ENVIRONMENT=prod
+    NAMESPACE=gameservers-prod
