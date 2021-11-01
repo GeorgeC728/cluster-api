@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api
+  #namespace: gameservers-dev
 spec:
   selector:
     matchLabels:
