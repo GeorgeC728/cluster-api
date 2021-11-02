@@ -69,8 +69,9 @@ def create_server_pod_template_spec(id, game, ram_gb, cpu_count):
                     image = get_image_name(game),
                     resources = client.V1ResourceRequirements(
                         limits = {
-                            "memory": str(ram_gb) + "G",
-                            "cpu": str(cpu_count * 1000) +"m"}
+                            "memory": str(ram_gb) + "G"#,
+                            #"cpu": str(cpu_count * 1000) +"m"
+                            }
                     ),
                     # Mount a persistent volume so worlds are saved
                     volume_mounts = [
