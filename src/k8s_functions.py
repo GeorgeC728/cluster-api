@@ -254,7 +254,9 @@ def scale_statefulset(id, replicas_count):
 # Returns the resource usage of a pod
 def get_pod_usage(id):
     # metric API path for a pod
-    metric_api = "/apis/metrics.k8s.io/v1beta1/namespaces/default/pods"
+    metric_api = \
+        "/apis/metrics.k8s.io/v1beta1/namespaces/" + \
+        getenv("NAMESPACE") + "/pods"
     # Run the API call - no built in functions v sad
     pod_metrics_raw = client.ApiClient().call_api(
         # Path for the resource
