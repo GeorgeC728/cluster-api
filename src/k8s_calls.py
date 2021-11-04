@@ -188,7 +188,8 @@ def get_usage(id):
     # Store in return
     resource_usage["memory_usage_gb"] = memory_usage
     # Get the CPU limits
-    cpu_limits =  convert_to_vcpu(pod_limits["cpu"])
+    #cpu_limits =  convert_to_vcpu(pod_limits["cpu"])
+    cpu_limits = 2
     # Store in return
     resource_usage["cpu_limits"] = cpu_limits
     # Get memory limits in GB
