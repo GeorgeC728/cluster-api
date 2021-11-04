@@ -2,6 +2,7 @@ from kubernetes import client, config
 from kubernetes.client.models.v1_container_port import V1ContainerPort               # For interacting with k8s API
 from misc_functions import *                        # Functions that I'm not sure where else to put
 import json
+from os import getenv
 
 # Create a service for a given server name
 def create_service(id, svc_name, target_name, port, target_port):
@@ -68,15 +69,17 @@ def create_server_pod_template_spec(id, game, ram_gb, cpu_count):
                     image = get_image_name(game),
                     resources = client.V1ResourceRequirements(
                         limits = {
-                            "memory": str(ram_gb) + "G",
-                            "cpu": str(cpu_count * 1000) +"m"}
+                            "memory": str(ram_gb) + "G"#,
+                            #"cpu": str(cpu_count * 1000) +"m"
+                            }
                     ),
                     # Mount a persistent volume so worlds are saved
                     volume_mounts = [
                         client.V1VolumeMount(
                             name = "minecraft-pvc-id-" + id,
                             # This is where the container saves world data
-                            mount_path = "/data/server"
+                            mount_path = "/data/server",
+                            sub_path = "data"
                         )
                     ],
                     # Env variables - just memory for now as its needed but defo have more later on
@@ -138,8 +141,8 @@ def create_sftp_pod_template_spec(id):
                     volume_mounts = [
                         client.V1VolumeMount(
                             name = "sftp-volume",
-                            mount_path = "/home/user/data"
-                            #sub_path to get rid of lost+found
+                            mount_path = "/home/user/data",
+                            sub_path = "data"
                         ),
                     ],
                     ports = [
@@ -222,27 +225,27 @@ def deploy_statefulset(id, game, ram_gb, disk_gb, cpu_count):
     # Get the statefulset object
     statefulset = create_statefulset(id, game, ram_gb, disk_gb, cpu_count)
     # Deploy it
-    client.AppsV1Api().create_namespaced_stateful_set(namespace = "default", body = statefulset)
+    client.AppsV1Api().create_namespaced_stateful_set(namespace = getenv("NAMESPACE"), body = statefulset)
 
 # Deploy a service - this will do both servers and sftp
 def deploy_service(id, svc_name, target_name, port, target_port):
     # Create the service
     service = create_service(id, svc_name, target_name, port, target_port)
     # Deploy it
-    client.CoreV1Api().create_namespaced_service(namespace = "default", body = service)
+    client.CoreV1Api().create_namespaced_service(namespace = getenv("NAMESPACE"), body = service)
 
 # Deploy a deployment for an sftp handler
 def deploy_sftp_deployment(id):
     # Create the deployment
     deployment = create_sftp_deployment(id)
     # Deploy it
-    client.AppsV1Api().create_namespaced_deployment(namespace = "default", body = deployment)
+    client.AppsV1Api().create_namespaced_deployment(namespace = getenv("NAMESPACE"), body = deployment)
 
 # Scale a statefulset - used for turning on/off
 def scale_statefulset(id, replicas_count):
     # Patch a the given object and change the number of replicas.
     client.AppsV1Api().patch_namespaced_stateful_set_scale(
-        namespace = "default",
+        namespace = getenv("NAMESPACE"),
         name = "minecraft-id-" + id,
         # Use plain ol' dict as thats what is needed
         body = {"spec":{"replicas":replicas_count}}
@@ -275,7 +278,7 @@ def get_pod_limits(id):
     # Extract resource limits from the pod spec
     resource_limits = client.CoreV1Api().read_namespaced_pod(
         name = "minecraft-id-" + str(id) + "-0",
-        namespace = "default").spec.containers[0].resources.limits
+        namespace = getenv("NAMESPACE")).spec.containers[0].resources.limits
     
     # Return resource limits
     return(resource_limits)

@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: api-svc
+  #namespace: gameservers-dev
 spec:
   selector:
     app: api
@@ -9,5 +10,4 @@ spec:
   - protocol: TCP
     port: 50
     targetPort: primary
-  type: LoadBalancer
-  loadBalancerIP: 35.246.23.17
+  type: NodePort

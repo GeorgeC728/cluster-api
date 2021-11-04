@@ -95,32 +95,32 @@ def delete_server(id):
     # Delete the server
     client.AppsV1Api().delete_namespaced_stateful_set(
         name = "minecraft-id-" + str(id),
-        namespace = "default"
+        namespace = getenv("NAMESPACE")
         )
     # Delete sftp
     client.AppsV1Api().delete_namespaced_deployment(
         name = "sftp-id-" + str(id),
-        namespace = "default"
+        namespace = getenv("NAMESPACE")
         )
     # Delete the server service
     client.CoreV1Api().delete_namespaced_service(
         name = "minecraft-primary-" + str(id),
-        namespace = "default"
+        namespace = getenv("NAMESPACE")
         )
     # Delete the server rcon service
     client.CoreV1Api().delete_namespaced_service(
         name = "minecraft-rcon-" + str(id),
-        namespace = "default"
+        namespace = getenv("NAMESPACE")
         )
     # Delete the sftp service
     client.CoreV1Api().delete_namespaced_service(
         name = "sftp" + str(id),
-        namespace = "default"
+        namespace = getenv("NAMESPACE")
         )
     # Delete the pvc
     client.CoreV1Api().delete_namespaced_persistent_volume_claim(
         name = "minecraft-pvc-id-" + str(id) + "-minecraft-id-" + str(id) + "-0",
-        namespace = "default"
+        namespace = getenv("NAMESPACE")
         )
     
     return({"success": True})
@@ -140,7 +140,7 @@ def get_sftp_port(id, type):
     # Get object representing the service
     service = client.CoreV1Api().read_namespaced_service(
         name = name,
-        namespace = "default")
+        namespace = getenv("NAMESPACE"))
     
     # Extract the port from the service object
     port = service.spec.ports[0].node_port
@@ -152,7 +152,7 @@ def get_sftp_port(id, type):
 def get_status(id):
     replicas_count = client.AppsV1Api().read_namespaced_stateful_set(
         name = "minecraft-id-" + str(id),
-        namespace = "default"
+        namespace = getenv("NAMESPACE")
     ).spec.replicas
 
     if replicas_count == 0:
@@ -160,7 +160,7 @@ def get_status(id):
     if replicas_count == 1:
         status = client.CoreV1Api().read_namespaced_pod(
             name = "minecraft-id-" + str(id) + "-0",
-            namespace = "default"
+            namespace = getenv("NAMESPACE")
         ).status.phase
         return({"success": True, "status": status})
     else:

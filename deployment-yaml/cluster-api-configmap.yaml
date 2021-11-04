@@ -2,6 +2,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: api-env
+  #namespace: gameservers-dev
 data:
   .env: |
     ENVIRONMENT=prod
+    NAMESPACE=gameservers-prod

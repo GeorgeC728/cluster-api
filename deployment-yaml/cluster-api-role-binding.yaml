@@ -2,7 +2,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: cluster-api
-  namespace: default
+  #namespace: gameservers-dev
 subjects:
 - kind: ServiceAccount
   name: cluster-api

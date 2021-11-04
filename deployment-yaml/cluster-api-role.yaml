@@ -1,9 +1,9 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  namespace: default
+  #namespace: gameservers-dev
   name: cluster-api
 rules:
 - apiGroups: ["", "apps", "metrics.k8s.io"]
-  resources: ["services", "statefulsets", "statefulsets/scale", "deployments", "pods", "configmaps"]
+  resources: ["services", "statefulsets", "statefulsets/scale", "deployments", "pods", "configmaps", "persistentvolumeclaims" ]
   verbs: ["get", "create", "update", "patch", "delete"]
