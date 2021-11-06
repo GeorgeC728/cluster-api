@@ -4,6 +4,23 @@ from misc_functions import *                        # Functions that I'm not sur
 import json
 from os import getenv
 
+# The memory required for java is less than that of the pod - calculate it
+def convert_to_java_memory(ram_gb):
+    # Convert to MB - this avoids floating point errors
+    ram_mb = ram_gb * 1024
+    # Return different values depending on ram
+    if ram_gb <= 1024:
+        return((ram_gb  * 0.55) / 1024)
+    elif ram_gb <= 2048:
+        return((ram_gb * 0.7) / 1024)
+    elif ram_gb <= 4096:
+        return((ram_gb * 0.8) / 1024)
+    elif ram_gb <= 6144:
+        return((ram_gb * 0.75) / 1024)
+    else:
+        return(r(am_gb * 0.8) / 1024)
+    
+
 # Create a service for a given server name
 def create_service(id, svc_name, target_name, port, target_port):
     service = client.V1Service(
@@ -69,7 +86,7 @@ def create_server_pod_template_spec(id, game, ram_gb, cpu_count):
                     image = get_image_name(game),
                     resources = client.V1ResourceRequirements(
                         limits = {
-                            "memory": str(ram_gb) + "G"#,
+                            "memory": str(convert_to_java_memory(ram_gb)) + "G"#,
                             #"cpu": str(cpu_count * 1000) +"m"
                             }
                     ),
