@@ -86,7 +86,7 @@ def create_server_pod_template_spec(id, game, ram_gb, cpu_count):
                     image = get_image_name(game),
                     resources = client.V1ResourceRequirements(
                         limits = {
-                            "memory": str(convert_to_java_memory(ram_gb)) + "G"#,
+                            "memory": str(ram_gb) + "G"#,
                             #"cpu": str(cpu_count * 1000) +"m"
                             }
                     ),
@@ -103,7 +103,7 @@ def create_server_pod_template_spec(id, game, ram_gb, cpu_count):
                     env = [
                         client.V1EnvVar(
                             name = "MEMORY",
-                            value = str(round(ram_gb * 1024 * 0.8))
+                            value = str(round(convert_to_java_memory(ram_gb) * 0.8))
                         ),
                         client.V1EnvVar(
                             name = "RCON_PASSWORD",
