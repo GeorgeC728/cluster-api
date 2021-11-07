@@ -1,4 +1,7 @@
 import re
+import json
+import pandas as pd
+from urllib.request import urlopen
 
 # Convert a gametype into an image name
 # This could utilise a config map so different values can be used in prod/dev etc.
@@ -63,3 +66,16 @@ def convert_to_vcpu(value):
         vcpus = 1
     
     return(vcpus * int(value.replace(unit, "")))
+
+# Get a version link from a version name
+def get_version_link(version):
+    # Link to mojangs version page
+    version_manifest_url = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
+    # Extract JSON from the version manifest
+    version_manifest_json = json.loads(urlopen(version_manifest_url).read().decode('utf-8'))
+    # Convert to dataframe
+    version_manifest_df = pd.DataFrame(version_manifest_json["versions"])
+    # Get the link to the desired veersion
+    url = version_manifest_df[version_manifest_df["id"] == version]["url"].values[0]
+    # Return the link
+    return(url)
