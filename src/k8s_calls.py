@@ -202,3 +202,13 @@ def get_usage(id):
     resource_usage["success"] = True
     # Return the memory usage
     return(resource_usage)
+
+@k8s_calls.route("/api/v1/server/<id>/logs", methods = ["GET"])
+def get_logs(id):
+    # Get the logs
+    logs = client.CoreV1Api().read_namespaced_pod_log(
+        name = "minecraft-id-" + str(id) + "-0",
+        namespace = getenv("NAMESPACE"),
+    )
+    # Return the logs
+    return({"success": True, "logs": logs})
