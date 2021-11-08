@@ -1,5 +1,5 @@
-from kubernetes import client, config
-from kubernetes.client.models.v1_container_port import V1ContainerPort               # For interacting with k8s API
+from kubernetes import client, config               # For interacting with k8s API
+from kubernetes.stream import stream                # For running exec commands
 from misc_functions import *                        # Functions that I'm not sure where else to put
 import json
 from os import getenv
@@ -299,3 +299,23 @@ def get_pod_limits(id):
     
     # Return resource limits
     return(resource_limits)
+
+# Function for doing kubectl exec 
+def exec_command(id, command):
+    # Save response to a variable
+    response = stream(
+        client.CoreV1Api().connect_get_namespaced_pod_exec,
+        # Get pod
+        name = "minecraft-id-" + str(id) + "-0",
+        # Get namespace
+        namespace = getenv("NAMESPACE"),
+        # use supplied command
+        command = command,
+        # Choose what kind of output we want
+        stderr = True,
+        stdout = True,
+        stdin = False,
+        tty = False
+    )
+    # Return the response
+    return(response)
