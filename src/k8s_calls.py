@@ -212,3 +212,28 @@ def get_logs(id):
     )
     # Return the logs
     return({"success": True, "logs": logs})
+
+@k8s_calls.route("/api/v1/server/<id>/disk-usage", methods = ["GET"])
+def get_disk_usage(id):
+    
+    
+    # Empty dictionary to store metrics
+    disk_usage = dict()
+    
+    # Get capacity from the pvc - df gives a slightly different capcity
+    storage_capacity = client.CoreV1Api().read_namespaced_persistent_volume_claim(
+        name = "minecraft-pvc-id-" + str(id) + "-minecraft-id-" + str(id) + "-0",
+        namespace = getenv("NAMESPACE")
+    ).status.capacity["storage"]
+    
+    # Get the resource usage. Returns two rows, want the second (first is header)
+    # Then split by spaces, first is capacity, second is usage
+    raw_metrics = k8s.exec_command(id, ["df", "/data/server", "--output=used"]).split("\n")[1]
+
+    disk_usage["storage_capacity_gb"] = convert_to_bytes(storage_capacity) / 2 ** 30
+    
+    # Get disk usage
+    disk_usage["usage_gb"] = int(raw_metrics) / 2 ** 20
+    
+    # Return the disk usage
+    return({"success": True, "disk_usage": disk_usage})
