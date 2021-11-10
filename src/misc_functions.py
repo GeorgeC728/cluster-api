@@ -75,7 +75,25 @@ def get_version_link(version):
     version_manifest_json = json.loads(urlopen(version_manifest_url).read().decode('utf-8'))
     # Convert to dataframe
     version_manifest_df = pd.DataFrame(version_manifest_json["versions"])
-    # Get the link to the desired veersion
-    url = version_manifest_df[version_manifest_df["id"] == version]["url"].values[0]
+    # Get the link to the desired versions json
+    version_json_url = version_manifest_df[version_manifest_df["id"] == version]["url"].values[0]
+    # Get the server.jar link from the json
+    version_url = json.loads(urlopen(version_json_url).read().decode('utf-8'))["downloads"]["server"]["url"]
     # Return the link
-    return(url)
+    return(version_url)
+
+# The memory required for java is less than that of the pod - calculate it
+def convert_to_java_memory(ram_gb):
+    # Convert to MB - this avoids floating point errors
+    ram_mb = float(ram_gb) * 1024
+    # Return different values depending on ram
+    if ram_mb <= 1024:
+        return(ram_mb  * 0.55)
+    elif ram_mb <= 2048:
+        return(ram_mb * 0.7)
+    elif ram_mb <= 4096:
+        return(ram_mb * 0.8)
+    elif ram_mb <= 6144:
+        return(ram_mb * 0.75)
+    else:
+        return(ram_mb * 0.8)

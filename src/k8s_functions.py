@@ -4,21 +4,7 @@ from misc_functions import *                        # Functions that I'm not sur
 import json
 from os import getenv
 
-# The memory required for java is less than that of the pod - calculate it
-def convert_to_java_memory(ram_gb):
-    # Convert to MB - this avoids floating point errors
-    ram_mb = ram_gb * 1024
-    # Return different values depending on ram
-    if ram_gb <= 1024:
-        return((ram_gb  * 0.55) / 1024)
-    elif ram_gb <= 2048:
-        return((ram_gb * 0.7) / 1024)
-    elif ram_gb <= 4096:
-        return((ram_gb * 0.8) / 1024)
-    elif ram_gb <= 6144:
-        return((ram_gb * 0.75) / 1024)
-    else:
-        return(r(am_gb * 0.8) / 1024)
+
     
 
 # Create a service for a given server name
@@ -69,7 +55,7 @@ def create_volume_claim(id, disk_gb):
     return(volume_claim)
 
 # pod template spec for gameservers
-def create_server_pod_template_spec(id, game, ram_gb, cpu_count):
+def create_server_pod_template_spec(id, game, version, ram_gb, cpu_count):
     pod = client.V1PodTemplateSpec(
         metadata = client.V1ObjectMeta(
                 # Create unique name
@@ -103,11 +89,15 @@ def create_server_pod_template_spec(id, game, ram_gb, cpu_count):
                     env = [
                         client.V1EnvVar(
                             name = "MEMORY",
-                            value = str(round(convert_to_java_memory(ram_gb) * 0.8))
+                            value = str(round(convert_to_java_memory(ram_gb)))
                         ),
                         client.V1EnvVar(
                             name = "RCON_PASSWORD",
                             value = "pass"
+                        ),
+                        client.V1EnvVar(
+                            name = "JAR_URL",
+                            value = get_version_link(version)
                         )
                     ],
                     ports = [
@@ -178,7 +168,7 @@ def create_sftp_pod_template_spec(id):
     return(pod)
 
 # Spec for gameservers
-def create_statefulset_spec(id, game, ram_gb, disk_gb, cpu_count):
+def create_statefulset_spec(id, game, version, ram_gb, disk_gb, cpu_count):
 
     statefulset_spec = client.V1StatefulSetSpec(
         # Add unique selector/name
@@ -188,7 +178,7 @@ def create_statefulset_spec(id, game, ram_gb, disk_gb, cpu_count):
         # One replica - don't want more than one gameserver per set
         replicas = 1,
         # Generate template spec
-        template = create_server_pod_template_spec(id, game, ram_gb, cpu_count),
+        template = create_server_pod_template_spec(id, game, version, ram_gb, cpu_count),
         # Genearte colume claim
         volume_claim_templates = [create_volume_claim(id, disk_gb)]
     )
@@ -210,7 +200,7 @@ def create_sftp_deployment_spec(id):
     return(deployment_spec)
 
 # Create the gamesverer - this will be deployed
-def create_statefulset(id, game, ram_gb, disk_gb, cpu_count):
+def create_statefulset(id, game, version, ram_gb, disk_gb, cpu_count):
 
     statefulset = client.V1StatefulSet(
         api_version = "apps/v1",
@@ -218,7 +208,7 @@ def create_statefulset(id, game, ram_gb, disk_gb, cpu_count):
         # Unique name
         metadata = client.V1ObjectMeta(name = "minecraft-id-" + id),
         # Generate spec for server
-        spec = create_statefulset_spec(id, game, ram_gb, disk_gb, cpu_count)
+        spec = create_statefulset_spec(id, game, version, ram_gb, disk_gb, cpu_count)
     )
     # Return object
     return(statefulset)
@@ -238,9 +228,9 @@ def create_sftp_deployment(id):
     return(deployment)
 
 # Deploy a statefulset for a gameserver
-def deploy_statefulset(id, game, ram_gb, disk_gb, cpu_count):
+def deploy_statefulset(id, game, version, ram_gb, disk_gb, cpu_count):
     # Get the statefulset object
-    statefulset = create_statefulset(id, game, ram_gb, disk_gb, cpu_count)
+    statefulset = create_statefulset(id, game, version, ram_gb, disk_gb, cpu_count)
     # Deploy it
     client.AppsV1Api().create_namespaced_stateful_set(namespace = getenv("NAMESPACE"), body = statefulset)
 

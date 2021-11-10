@@ -35,6 +35,7 @@ def create_server(id):
     k8s.deploy_statefulset(
         id = str(id),
         game = "minecraft",
+        version = data["version"],
         ram_gb = data["ram_gb"],
         disk_gb = data["disk_gb"],
         cpu_count = data["cpu_count"])
