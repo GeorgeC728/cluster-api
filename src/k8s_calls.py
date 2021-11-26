@@ -242,6 +242,6 @@ def get_disk_usage(id):
 @k8s_calls.route("/api/v1/server/<id>/command", methods = ["POST"])
 def execute_command(id):
     
-    k8s.exec_command(id, ["bash", "-c", "echo '" + request.json["command"] + "' > /data/stdin"])
+    k8s.exec_command(id, ["/data/scripts/exec_command.sh", request.json["command"]])
     
     return({"success": True})
